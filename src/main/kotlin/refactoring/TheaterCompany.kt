@@ -25,10 +25,8 @@ class TheaterCompany(private val plays: Map<String, Play>) {
             totalAmount += amountFor(perf)
         }
 
-        val volumeCredits = totalVolumeCredits(invoice)
-
         result += "Amount owed is ${usd(totalAmount.toDouble())}\n"
-        result += "You earned $volumeCredits credits\n"
+        result += "You earned ${totalVolumeCredits(invoice)} credits\n"
 
         return result
     }
