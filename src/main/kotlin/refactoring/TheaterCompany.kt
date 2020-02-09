@@ -24,11 +24,7 @@ class TheaterCompany(private val plays: Map<String, Play>) {
         }
 
         invoice.performances.forEach { perf ->
-            // add volume credits
-            volumeCredits += max(perf.audience - 30, 0)
-            // add extra credit for every ten comedy attendees
-            if (PlayType.COMEDY == playFor(perf)?.type)
-                volumeCredits += floor(perf.audience.toDouble() / 5).toInt()
+            volumeCredits += volumeCreditsFor(perf)
 
             // print line for this order
             result += "${playFor(perf)?.name}: ${format(amountFor(perf).toDouble() / 100)} (${perf.audience} seats)\n"
@@ -65,4 +61,13 @@ class TheaterCompany(private val plays: Map<String, Play>) {
     }
 
     private fun playFor(aPerformance: Performance) = plays[aPerformance.playID]
+
+    private fun volumeCreditsFor(perf: Performance) : Int {
+        var volumeCredits = 0
+        volumeCredits += max(perf.audience - 30, 0)
+        if (PlayType.COMEDY == playFor(perf)?.type)
+            volumeCredits += floor(perf.audience.toDouble() / 5).toInt()
+
+        return volumeCredits
+    }
 }
