@@ -24,34 +24,16 @@ fun statement(invoice: Invoice, plays: Map<String, Play>): String {
 
     invoice.performances.forEach { perf ->
         val play = plays[perf.playID]
-        var thisAmount = 0
-
-
-        when (play?.type) {
-            PlayType.TRAGEDY -> {
-                thisAmount = 40000
-                if (perf.audience > 30) {
-                    thisAmount += 1000 * (perf.audience - 30)
-                }
-            }
-            PlayType.COMEDY -> {
-                thisAmount = 30000
-                if (perf.audience > 20) {
-                    thisAmount += 10000 + 500 * (perf.audience - 20)
-                }
-                thisAmount += 300 * perf.audience
-            }
-            else -> throw  Error("unknown type: ${play?.type}")
-        }
+        val thisAmount = amountFor(perf, play)
 
         // add volume credits
         volumeCredits += max(perf.audience - 30, 0)
         // add extra credit for every ten comedy attendees
-        if (PlayType.COMEDY == play.type)
+        if (PlayType.COMEDY == play?.type)
             volumeCredits += floor(perf.audience.toDouble() / 5).toInt()
 
         // print line for this order
-        result += "${play.name}: ${format(thisAmount.toDouble() / 100)} (${perf.audience} seats)\n"
+        result += "${play?.name}: ${format(thisAmount.toDouble() / 100)} (${perf.audience} seats)\n"
         totalAmount += thisAmount
     }
 
@@ -59,4 +41,27 @@ fun statement(invoice: Invoice, plays: Map<String, Play>): String {
     result += "You earned $volumeCredits credits\n"
 
     return result
+}
+
+fun amountFor(perf: Performance, play: Play?): Int {
+    var thisAmount = 0
+
+    when (play?.type) {
+        PlayType.TRAGEDY -> {
+            thisAmount = 40000
+            if (perf.audience > 30) {
+                thisAmount += 1000 * (perf.audience - 30)
+            }
+        }
+        PlayType.COMEDY -> {
+            thisAmount = 30000
+            if (perf.audience > 20) {
+                thisAmount += 10000 + 500 * (perf.audience - 20)
+            }
+            thisAmount += 300 * perf.audience
+        }
+        else -> throw  Error("unknown type: ${play?.type}")
+    }
+
+    return thisAmount
 }
