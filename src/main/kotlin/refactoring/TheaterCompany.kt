@@ -21,11 +21,13 @@ class TheaterCompany(private val plays: Map<String, Play>) {
         var result = "Statement for ${invoice.costumer}\n"
 
         invoice.performances.forEach { perf ->
-            volumeCredits += volumeCreditsFor(perf)
-
             // print line for this order
-            result += "${playFor(perf)?.name}: ${usd(amountFor(perf).toDouble() )} (${perf.audience} seats)\n"
+            result += "${playFor(perf)?.name}: ${usd(amountFor(perf).toDouble())} (${perf.audience} seats)\n"
             totalAmount += amountFor(perf)
+        }
+
+        invoice.performances.forEach { perf ->
+            volumeCredits += volumeCreditsFor(perf)
         }
 
         result += "Amount owed is ${usd(totalAmount.toDouble())}\n"
@@ -59,7 +61,7 @@ class TheaterCompany(private val plays: Map<String, Play>) {
 
     private fun playFor(aPerformance: Performance) = plays[aPerformance.playID]
 
-    private fun volumeCreditsFor(aPerformance: Performance) : Int {
+    private fun volumeCreditsFor(aPerformance: Performance): Int {
         var result = 0
         result += max(aPerformance.audience - 30, 0)
         if (PlayType.COMEDY == playFor(aPerformance)?.type)
