@@ -25,10 +25,7 @@ class TheaterCompany(private val plays: Map<String, Play>) {
             totalAmount += amountFor(perf)
         }
 
-        var volumeCredits = 0
-        invoice.performances.forEach { perf ->
-            volumeCredits += volumeCreditsFor(perf)
-        }
+        val volumeCredits = totalVolumeCredits(invoice)
 
         result += "Amount owed is ${usd(totalAmount.toDouble())}\n"
         result += "You earned $volumeCredits credits\n"
@@ -71,4 +68,12 @@ class TheaterCompany(private val plays: Map<String, Play>) {
     }
 
     private fun usd(aNumber: Double) = Money.of(CurrencyUnit.USD, aNumber / 100).toString()
+
+    private fun totalVolumeCredits(invoice: Invoice): Int {
+        var volumeCredits = 0
+        invoice.performances.forEach { perf ->
+            volumeCredits += volumeCreditsFor(perf)
+        }
+        return volumeCredits
+    }
 }
