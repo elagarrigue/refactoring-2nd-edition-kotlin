@@ -16,14 +16,19 @@ data class Play(val name: String, val type: PlayType)
 class TheaterCompany(private val plays: Map<String, Play>) {
 
     fun statement(invoice: Invoice): String {
-        var totalAmount = 0
         var result = "Statement for ${invoice.costumer}\n"
 
         invoice.performances.forEach { perf ->
             // print line for this order
             result += "${playFor(perf)?.name}: ${usd(amountFor(perf).toDouble())} (${perf.audience} seats)\n"
+
+        }
+
+        var totalAmount = 0
+        invoice.performances.forEach { perf ->
             totalAmount += amountFor(perf)
         }
+
 
         result += "Amount owed is ${usd(totalAmount.toDouble())}\n"
         result += "You earned ${totalVolumeCredits(invoice)} credits\n"
