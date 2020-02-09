@@ -67,18 +67,18 @@ class TheaterCompany(private val plays: Map<String, Play>) {
     private fun usd(aNumber: Double) = Money.of(CurrencyUnit.USD, aNumber / 100).toString()
 
     private fun totalVolumeCredits(invoice: Invoice): Int {
-        var volumeCredits = 0
+        var result = 0
         invoice.performances.forEach { perf ->
-            volumeCredits += volumeCreditsFor(perf)
+            result += volumeCreditsFor(perf)
         }
-        return volumeCredits
+        return result
     }
 
     private fun totalAmount(invoice: Invoice): Int {
-        var totalAmount = 0
+        var result = 0
         invoice.performances.forEach { perf ->
-            totalAmount += amountFor(perf)
+            result += amountFor(perf)
         }
-        return totalAmount
+        return result
     }
 }
