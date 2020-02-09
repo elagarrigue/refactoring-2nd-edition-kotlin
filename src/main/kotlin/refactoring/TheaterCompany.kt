@@ -24,8 +24,6 @@ class TheaterCompany(private val plays: Map<String, Play>) {
         }
 
         invoice.performances.forEach { perf ->
-            val thisAmount = amountFor(perf)
-
             // add volume credits
             volumeCredits += max(perf.audience - 30, 0)
             // add extra credit for every ten comedy attendees
@@ -33,8 +31,8 @@ class TheaterCompany(private val plays: Map<String, Play>) {
                 volumeCredits += floor(perf.audience.toDouble() / 5).toInt()
 
             // print line for this order
-            result += "${playFor(perf)?.name}: ${format(thisAmount.toDouble() / 100)} (${perf.audience} seats)\n"
-            totalAmount += thisAmount
+            result += "${playFor(perf)?.name}: ${format(amountFor(perf).toDouble() / 100)} (${perf.audience} seats)\n"
+            totalAmount += amountFor(perf)
         }
 
         result += "Amount owed is ${format(totalAmount.toDouble() / 100)}\n"
