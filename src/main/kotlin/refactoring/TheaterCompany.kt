@@ -19,10 +19,7 @@ class TheaterCompany(private val plays: Map<String, Play>) {
         var totalAmount = 0
         var volumeCredits = 0
         var result = "Statement for ${invoice.costumer}\n"
-        val format: (money: Double) -> String = {
-            Money.of(CurrencyUnit.USD, it).toString()
-        }
-
+        
         invoice.performances.forEach { perf ->
             volumeCredits += volumeCreditsFor(perf)
 
@@ -70,4 +67,6 @@ class TheaterCompany(private val plays: Map<String, Play>) {
 
         return result
     }
+
+    private fun format(aNumber: Double) = Money.of(CurrencyUnit.USD, aNumber).toString()
 }
