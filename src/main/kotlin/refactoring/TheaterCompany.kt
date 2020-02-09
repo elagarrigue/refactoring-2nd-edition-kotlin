@@ -43,25 +43,25 @@ fun statement(invoice: Invoice, plays: Map<String, Play>): String {
     return result
 }
 
-fun amountFor(perf: Performance, play: Play?): Int {
-    var thisAmount = 0
+fun amountFor(aPerformance: Performance, play: Play?): Int {
+    var result = 0
 
     when (play?.type) {
         PlayType.TRAGEDY -> {
-            thisAmount = 40000
-            if (perf.audience > 30) {
-                thisAmount += 1000 * (perf.audience - 30)
+            result = 40000
+            if (aPerformance.audience > 30) {
+                result += 1000 * (aPerformance.audience - 30)
             }
         }
         PlayType.COMEDY -> {
-            thisAmount = 30000
-            if (perf.audience > 20) {
-                thisAmount += 10000 + 500 * (perf.audience - 20)
+            result = 30000
+            if (aPerformance.audience > 20) {
+                result += 10000 + 500 * (aPerformance.audience - 20)
             }
-            thisAmount += 300 * perf.audience
+            result += 300 * aPerformance.audience
         }
         else -> throw  Error("unknown type: ${play?.type}")
     }
 
-    return thisAmount
+    return result
 }
