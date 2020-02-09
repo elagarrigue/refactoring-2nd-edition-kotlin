@@ -17,7 +17,6 @@ class TheaterCompany(private val plays: Map<String, Play>) {
 
     fun statement(invoice: Invoice): String {
         var totalAmount = 0
-        var volumeCredits = 0
         var result = "Statement for ${invoice.costumer}\n"
 
         invoice.performances.forEach { perf ->
@@ -26,6 +25,7 @@ class TheaterCompany(private val plays: Map<String, Play>) {
             totalAmount += amountFor(perf)
         }
 
+        var volumeCredits = 0
         invoice.performances.forEach { perf ->
             volumeCredits += volumeCreditsFor(perf)
         }
