@@ -22,7 +22,9 @@ class TheaterCompanyTest {
 
     @Test
     fun `should build statement string`() {
-        val result = statement(invoice, plays)
+        val company = TheaterCompany(plays)
+
+        val result = company.statement(invoice)
 
         val expected = "Statement for BigCo\n" +
                 "Hamlet: USD 650.00 (55 seats)\n" +
