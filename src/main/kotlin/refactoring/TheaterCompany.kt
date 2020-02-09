@@ -24,17 +24,16 @@ class TheaterCompany(private val plays: Map<String, Play>) {
         }
 
         invoice.performances.forEach { perf ->
-            val play = plays[perf.playID]
-            val thisAmount = amountFor(perf, play)
+            val thisAmount = amountFor(perf)
 
             // add volume credits
             volumeCredits += max(perf.audience - 30, 0)
             // add extra credit for every ten comedy attendees
-            if (PlayType.COMEDY == play?.type)
+            if (PlayType.COMEDY == playFor(perf)?.type)
                 volumeCredits += floor(perf.audience.toDouble() / 5).toInt()
 
             // print line for this order
-            result += "${play?.name}: ${format(thisAmount.toDouble() / 100)} (${perf.audience} seats)\n"
+            result += "${playFor(perf)?.name}: ${format(thisAmount.toDouble() / 100)} (${perf.audience} seats)\n"
             totalAmount += thisAmount
         }
 
@@ -44,10 +43,10 @@ class TheaterCompany(private val plays: Map<String, Play>) {
         return result
     }
 
-    private fun amountFor(aPerformance: Performance, play: Play?): Int {
+    private fun amountFor(aPerformance: Performance): Int {
         var result = 0
 
-        when (play?.type) {
+        when (playFor(aPerformance)?.type) {
             PlayType.TRAGEDY -> {
                 result = 40000
                 if (aPerformance.audience > 30) {
@@ -61,9 +60,11 @@ class TheaterCompany(private val plays: Map<String, Play>) {
                 }
                 result += 300 * aPerformance.audience
             }
-            else -> throw  Error("unknown type: ${play?.type}")
+            else -> throw  Error("unknown type: ${playFor(aPerformance)?.type}")
         }
 
         return result
     }
+
+    private fun playFor(aPerformance: Performance) = plays[aPerformance.playID]
 }
