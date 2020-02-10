@@ -19,9 +19,7 @@ class TragedyCalculator(
 ) : PerformanceCalculator(performance, play) {
 
     override fun getAmount(): Int {
-        var result = 0
-
-        result = 40000
+        var result = 40000
         if (performance.audience > 30) {
             result += 1000 * (performance.audience - 30)
         }
@@ -36,9 +34,7 @@ class ComedyCalculator(
 ) : PerformanceCalculator(performance, play) {
 
     override fun getAmount(): Int {
-        var result = 0
-
-        result = 30000
+        var result = 30000
         if (performance.audience > 20) {
             result += 10000 + 500 * (performance.audience - 20)
         }

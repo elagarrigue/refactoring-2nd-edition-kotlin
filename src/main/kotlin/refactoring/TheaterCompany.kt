@@ -60,6 +60,4 @@ class TheaterCompany(plays: Map<String, Play>) {
     }
 
     private fun usd(aNumber: Double) = Money.of(CurrencyUnit.USD, aNumber / 100).toString()
-
-
 }
