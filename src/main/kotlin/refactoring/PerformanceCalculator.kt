@@ -1,11 +1,16 @@
 package refactoring
 
+import kotlin.math.floor
+import kotlin.math.max
+
 sealed class PerformanceCalculator(
     val performance: Performance,
     val play: Play
 ) {
 
     abstract fun getAmount(): Int
+
+    open fun getVolumeCredits() = max(performance.audience - 30, 0)
 }
 
 class TragedyCalculator(
@@ -41,5 +46,8 @@ class ComedyCalculator(
 
         return result
     }
+
+    override fun getVolumeCredits() =
+        super.getVolumeCredits() + floor(performance.audience.toDouble() / 5).toInt()
 }
 

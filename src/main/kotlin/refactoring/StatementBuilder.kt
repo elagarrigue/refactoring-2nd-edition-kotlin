@@ -23,7 +23,7 @@ class StatementBuilder(private val plays: Map<String, Play>) {
         )
             .apply {
                 amount = calculator.getAmount()
-                volumeCredits = volumeCreditsFor(this)
+                volumeCredits = calculator.getVolumeCredits()
             }
     }
 
@@ -41,13 +41,4 @@ class StatementBuilder(private val plays: Map<String, Play>) {
         data.performances.map { it.volumeCredits }.reduce { acc, volumeCredits -> acc + volumeCredits }
 
     private fun playFor(aPerformance: Performance) = plays[aPerformance.playID] ?: error("Missing play")
-
-    private fun volumeCreditsFor(aPerformance: PerformanceWithPlay): Int {
-        var result = 0
-        result += max(aPerformance.audience - 30, 0)
-        if (PlayType.COMEDY == aPerformance.play.type)
-            result += floor(aPerformance.audience.toDouble() / 5).toInt()
-
-        return result
-    }
 }
