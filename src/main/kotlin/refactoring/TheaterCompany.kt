@@ -18,7 +18,10 @@ enum class PlayType { TRAGEDY, COMEDY }
 
 data class Play(val name: String, val type: PlayType)
 
-data class StatementData(val costumer: String, val performances: List<PerformanceWithPlay>)
+data class StatementData(val costumer: String, val performances: List<PerformanceWithPlay>) {
+    var totalAmount: Int = 0
+    var totalVolumeCredits: Int = 0
+}
 
 class TheaterCompany(private val plays: Map<String, Play>) {
 
@@ -27,7 +30,10 @@ class TheaterCompany(private val plays: Map<String, Play>) {
             StatementData(
                 invoice.costumer,
                 invoice.performances.map(::enrichPerformance)
-            )
+            ).apply {
+                totalAmount = totalAmount(this.performances)
+                totalVolumeCredits = totalVolumeCredits(this.performances)
+            }
         return renderPlainText(statementData)
     }
 
@@ -40,6 +46,22 @@ class TheaterCompany(private val plays: Map<String, Play>) {
                 amount = amountFor(this)
                 volumeCredits = volumeCreditsFor(this)
             }
+
+    private fun totalAmount(performances: List<PerformanceWithPlay>): Int {
+        var result = 0
+        performances.forEach { perf ->
+            result += perf.amount
+        }
+        return result
+    }
+
+    private fun totalVolumeCredits(performances: List<PerformanceWithPlay>): Int {
+        var result = 0
+        performances.forEach { perf ->
+            result += perf.volumeCredits
+        }
+        return result
+    }
 
     private fun amountFor(aPerformance: PerformanceWithPlay): Int {
         var result = 0
@@ -83,27 +105,13 @@ class TheaterCompany(private val plays: Map<String, Play>) {
 
         }
 
-        result += "Amount owed is ${usd(totalAmount(data.performances).toDouble())}\n"
-        result += "You earned ${totalVolumeCredits(data.performances)} credits\n"
+        result += "Amount owed is ${usd(data.totalAmount.toDouble())}\n"
+        result += "You earned ${data.totalVolumeCredits} credits\n"
 
         return result
     }
 
     private fun usd(aNumber: Double) = Money.of(CurrencyUnit.USD, aNumber / 100).toString()
 
-    private fun totalVolumeCredits(performances: List<PerformanceWithPlay>): Int {
-        var result = 0
-        performances.forEach { perf ->
-            result += perf.volumeCredits
-        }
-        return result
-    }
 
-    private fun totalAmount(performances: List<PerformanceWithPlay>): Int {
-        var result = 0
-        performances.forEach { perf ->
-            result += perf.amount
-        }
-        return result
-    }
 }
