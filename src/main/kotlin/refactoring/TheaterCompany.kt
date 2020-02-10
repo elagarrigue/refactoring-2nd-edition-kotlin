@@ -25,17 +25,16 @@ data class StatementData(val costumer: String, val performances: List<Performanc
 
 class TheaterCompany(private val plays: Map<String, Play>) {
 
-    fun statement(invoice: Invoice): String {
-        val statementData =
-            StatementData(
-                invoice.costumer,
-                invoice.performances.map(::enrichPerformance)
-            ).apply {
-                totalAmount = totalAmount(this)
-                totalVolumeCredits = totalVolumeCredits(this)
-            }
-        return renderPlainText(statementData)
-    }
+    fun statement(invoice: Invoice) = renderPlainText(createStatementData(invoice))
+
+    private fun createStatementData(invoice: Invoice) =
+        StatementData(
+            invoice.costumer,
+            invoice.performances.map(::enrichPerformance)
+        ).apply {
+            totalAmount = totalAmount(this)
+            totalVolumeCredits = totalVolumeCredits(this)
+        }
 
     private fun enrichPerformance(aPerformance: Performance): PerformanceWithPlay =
         PerformanceWithPlay(
