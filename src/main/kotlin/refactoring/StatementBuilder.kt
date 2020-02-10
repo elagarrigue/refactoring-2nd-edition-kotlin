@@ -28,7 +28,11 @@ class StatementBuilder(private val plays: Map<String, Play>) {
     }
 
     private fun createPerformanceCalculator(aPerformance: Performance) =
-        PerformanceCalculator(aPerformance, playFor(aPerformance))
+        when(playFor(aPerformance).type) {
+            PlayType.COMEDY ->  ComedyCalculator(aPerformance, playFor(aPerformance))
+            PlayType.TRAGEDY ->  TragedyCalculator(aPerformance, playFor(aPerformance))
+        }
+
 
     private fun totalAmount(data: StatementData): Int =
         data.performances.map { it.amount }.reduce { acc, amount -> acc + amount }
