@@ -14,15 +14,18 @@ class StatementBuilder(private val plays: Map<String, Play>) {
             totalVolumeCredits = totalVolumeCredits(this)
         }
 
-    private fun enrichPerformance(aPerformance: Performance): PerformanceWithPlay =
-        PerformanceWithPlay(
-            playFor(aPerformance) ?: error("Missing play"),
+    private fun enrichPerformance(aPerformance: Performance): PerformanceWithPlay {
+        val calculator = PerformanceCalculator(aPerformance, playFor(aPerformance))
+
+        return PerformanceWithPlay(
+            calculator.play,
             aPerformance.audience
         )
             .apply {
                 amount = amountFor(this)
                 volumeCredits = volumeCreditsFor(this)
             }
+    }
 
     private fun totalAmount(data: StatementData): Int =
         data.performances.map { it.amount }.reduce { acc, amount -> acc + amount }
@@ -52,7 +55,7 @@ class StatementBuilder(private val plays: Map<String, Play>) {
         return result
     }
 
-    private fun playFor(aPerformance: Performance) = plays[aPerformance.playID]
+    private fun playFor(aPerformance: Performance) = plays[aPerformance.playID] ?: error("Missing play")
 
     private fun volumeCreditsFor(aPerformance: PerformanceWithPlay): Int {
         var result = 0
