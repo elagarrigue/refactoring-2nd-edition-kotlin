@@ -31,8 +31,8 @@ class TheaterCompany(private val plays: Map<String, Play>) {
                 invoice.costumer,
                 invoice.performances.map(::enrichPerformance)
             ).apply {
-                totalAmount = totalAmount(this.performances)
-                totalVolumeCredits = totalVolumeCredits(this.performances)
+                totalAmount = totalAmount(this)
+                totalVolumeCredits = totalVolumeCredits(this)
             }
         return renderPlainText(statementData)
     }
@@ -47,21 +47,11 @@ class TheaterCompany(private val plays: Map<String, Play>) {
                 volumeCredits = volumeCreditsFor(this)
             }
 
-    private fun totalAmount(performances: List<PerformanceWithPlay>): Int {
-        var result = 0
-        performances.forEach { perf ->
-            result += perf.amount
-        }
-        return result
-    }
+    private fun totalAmount(data: StatementData): Int =
+        data.performances.map { it.amount }.reduce { acc, amount -> acc + amount }
 
-    private fun totalVolumeCredits(performances: List<PerformanceWithPlay>): Int {
-        var result = 0
-        performances.forEach { perf ->
-            result += perf.volumeCredits
-        }
-        return result
-    }
+    private fun totalVolumeCredits(data: StatementData): Int =
+        data.performances.map { it.volumeCredits }.reduce { acc, volumeCredits -> acc + volumeCredits }
 
     private fun amountFor(aPerformance: PerformanceWithPlay): Int {
         var result = 0
