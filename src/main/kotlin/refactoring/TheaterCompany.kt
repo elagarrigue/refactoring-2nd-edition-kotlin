@@ -13,21 +13,26 @@ enum class PlayType { TRAGEDY, COMEDY }
 
 data class Play(val name: String, val type: PlayType)
 
+data class StatementData(val costumer: String, val performances: List<Performance>)
+
 class TheaterCompany(private val plays: Map<String, Play>) {
 
-    fun statement(invoice: Invoice): String = renderPlainText(invoice)
+    fun statement(invoice: Invoice): String {
+        val statementData = StatementData(invoice.costumer, invoice.performances)
+        return renderPlainText(statementData)
+    }
 
-    private fun renderPlainText(invoice: Invoice): String {
-        var result = "Statement for ${invoice.costumer}\n"
+    private fun renderPlainText(data: StatementData): String {
+        var result = "Statement for ${data.costumer}\n"
 
-        invoice.performances.forEach { perf ->
+        data.performances.forEach { perf ->
             // print line for this order
             result += "${playFor(perf)?.name}: ${usd(amountFor(perf).toDouble())} (${perf.audience} seats)\n"
 
         }
 
-        result += "Amount owed is ${usd(totalAmount(invoice).toDouble())}\n"
-        result += "You earned ${totalVolumeCredits(invoice)} credits\n"
+        result += "Amount owed is ${usd(totalAmount(data.performances).toDouble())}\n"
+        result += "You earned ${totalVolumeCredits(data.performances)} credits\n"
 
         return result
     }
@@ -68,17 +73,17 @@ class TheaterCompany(private val plays: Map<String, Play>) {
 
     private fun usd(aNumber: Double) = Money.of(CurrencyUnit.USD, aNumber / 100).toString()
 
-    private fun totalVolumeCredits(invoice: Invoice): Int {
+    private fun totalVolumeCredits(performances: List<Performance>): Int {
         var result = 0
-        invoice.performances.forEach { perf ->
+        performances.forEach { perf ->
             result += volumeCreditsFor(perf)
         }
         return result
     }
 
-    private fun totalAmount(invoice: Invoice): Int {
+    private fun totalAmount(performances: List<Performance>): Int {
         var result = 0
-        invoice.performances.forEach { perf ->
+        performances.forEach { perf ->
             result += amountFor(perf)
         }
         return result
