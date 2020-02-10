@@ -7,7 +7,9 @@ import kotlin.math.max
 
 data class Performance(val playID: String, val audience: Int)
 
-data class PerformanceWithPlay(val play: Play, val audience: Int)
+data class PerformanceWithPlay(val play: Play, val audience: Int) {
+    var amount: Int = 0
+}
 
 data class Invoice(val costumer: String, val performances: List<Performance>)
 
@@ -28,25 +30,12 @@ class TheaterCompany(private val plays: Map<String, Play>) {
         return renderPlainText(statementData)
     }
 
-    private fun enrichPerformance(aPerformance: Performance) : PerformanceWithPlay =
-        PerformanceWithPlay(playFor(aPerformance) ?: error("Missing play"), aPerformance.audience)
-
-    private fun playFor(aPerformance: Performance) = plays[aPerformance.playID]
-
-    private fun renderPlainText(data: StatementData): String {
-        var result = "Statement for ${data.costumer}\n"
-
-        data.performances.forEach { perf ->
-            // print line for this order
-            result += "${perf.play.name}: ${usd(amountFor(perf).toDouble())} (${perf.audience} seats)\n"
-
-        }
-
-        result += "Amount owed is ${usd(totalAmount(data.performances).toDouble())}\n"
-        result += "You earned ${totalVolumeCredits(data.performances)} credits\n"
-
-        return result
-    }
+    private fun enrichPerformance(aPerformance: Performance): PerformanceWithPlay =
+        PerformanceWithPlay(
+            playFor(aPerformance) ?: error("Missing play"),
+            aPerformance.audience
+        )
+            .apply { amount = amountFor(this) }
 
     private fun amountFor(aPerformance: PerformanceWithPlay): Int {
         var result = 0
@@ -66,6 +55,23 @@ class TheaterCompany(private val plays: Map<String, Play>) {
                 result += 300 * aPerformance.audience
             }
         }
+
+        return result
+    }
+
+    private fun playFor(aPerformance: Performance) = plays[aPerformance.playID]
+
+    private fun renderPlainText(data: StatementData): String {
+        var result = "Statement for ${data.costumer}\n"
+
+        data.performances.forEach { perf ->
+            // print line for this order
+            result += "${perf.play.name}: ${usd(perf.amount.toDouble())} (${perf.audience} seats)\n"
+
+        }
+
+        result += "Amount owed is ${usd(totalAmount(data.performances).toDouble())}\n"
+        result += "You earned ${totalVolumeCredits(data.performances)} credits\n"
 
         return result
     }
@@ -92,7 +98,7 @@ class TheaterCompany(private val plays: Map<String, Play>) {
     private fun totalAmount(performances: List<PerformanceWithPlay>): Int {
         var result = 0
         performances.forEach { perf ->
-            result += amountFor(perf)
+            result += perf.amount
         }
         return result
     }
