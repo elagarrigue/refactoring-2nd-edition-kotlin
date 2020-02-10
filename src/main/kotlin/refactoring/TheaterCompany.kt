@@ -7,27 +7,38 @@ import kotlin.math.max
 
 data class Performance(val playID: String, val audience: Int)
 
+data class PerformanceWithPlay(val play: Play, val audience: Int)
+
 data class Invoice(val costumer: String, val performances: List<Performance>)
 
 enum class PlayType { TRAGEDY, COMEDY }
 
 data class Play(val name: String, val type: PlayType)
 
-data class StatementData(val costumer: String, val performances: List<Performance>)
+data class StatementData(val costumer: String, val performances: List<PerformanceWithPlay>)
 
 class TheaterCompany(private val plays: Map<String, Play>) {
 
     fun statement(invoice: Invoice): String {
-        val statementData = StatementData(invoice.costumer, invoice.performances)
+        val statementData =
+            StatementData(
+                invoice.costumer,
+                invoice.performances.map(::enrichPerformance)
+            )
         return renderPlainText(statementData)
     }
+
+    private fun enrichPerformance(aPerformance: Performance) : PerformanceWithPlay =
+        PerformanceWithPlay(playFor(aPerformance) ?: error("Missing play"), aPerformance.audience)
+
+    private fun playFor(aPerformance: Performance) = plays[aPerformance.playID]
 
     private fun renderPlainText(data: StatementData): String {
         var result = "Statement for ${data.costumer}\n"
 
         data.performances.forEach { perf ->
             // print line for this order
-            result += "${playFor(perf)?.name}: ${usd(amountFor(perf).toDouble())} (${perf.audience} seats)\n"
+            result += "${perf.play.name}: ${usd(amountFor(perf).toDouble())} (${perf.audience} seats)\n"
 
         }
 
@@ -37,10 +48,10 @@ class TheaterCompany(private val plays: Map<String, Play>) {
         return result
     }
 
-    private fun amountFor(aPerformance: Performance): Int {
+    private fun amountFor(aPerformance: PerformanceWithPlay): Int {
         var result = 0
 
-        when (playFor(aPerformance)?.type) {
+        when (aPerformance.play.type) {
             PlayType.TRAGEDY -> {
                 result = 40000
                 if (aPerformance.audience > 30) {
@@ -54,18 +65,15 @@ class TheaterCompany(private val plays: Map<String, Play>) {
                 }
                 result += 300 * aPerformance.audience
             }
-            else -> throw  Error("unknown type: ${playFor(aPerformance)?.type}")
         }
 
         return result
     }
 
-    private fun playFor(aPerformance: Performance) = plays[aPerformance.playID]
-
-    private fun volumeCreditsFor(aPerformance: Performance): Int {
+    private fun volumeCreditsFor(aPerformance: PerformanceWithPlay): Int {
         var result = 0
         result += max(aPerformance.audience - 30, 0)
-        if (PlayType.COMEDY == playFor(aPerformance)?.type)
+        if (PlayType.COMEDY == aPerformance.play.type)
             result += floor(aPerformance.audience.toDouble() / 5).toInt()
 
         return result
@@ -73,7 +81,7 @@ class TheaterCompany(private val plays: Map<String, Play>) {
 
     private fun usd(aNumber: Double) = Money.of(CurrencyUnit.USD, aNumber / 100).toString()
 
-    private fun totalVolumeCredits(performances: List<Performance>): Int {
+    private fun totalVolumeCredits(performances: List<PerformanceWithPlay>): Int {
         var result = 0
         performances.forEach { perf ->
             result += volumeCreditsFor(perf)
@@ -81,7 +89,7 @@ class TheaterCompany(private val plays: Map<String, Play>) {
         return result
     }
 
-    private fun totalAmount(performances: List<Performance>): Int {
+    private fun totalAmount(performances: List<PerformanceWithPlay>): Int {
         var result = 0
         performances.forEach { perf ->
             result += amountFor(perf)
