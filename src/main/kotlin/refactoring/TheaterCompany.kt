@@ -15,7 +15,9 @@ data class Play(val name: String, val type: PlayType)
 
 class TheaterCompany(private val plays: Map<String, Play>) {
 
-    fun statement(invoice: Invoice): String {
+    fun statement(invoice: Invoice): String = renderPlainText(invoice)
+
+    private fun renderPlainText(invoice: Invoice): String {
         var result = "Statement for ${invoice.costumer}\n"
 
         invoice.performances.forEach { perf ->
