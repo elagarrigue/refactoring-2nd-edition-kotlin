@@ -23,68 +23,12 @@ data class StatementData(val costumer: String, val performances: List<Performanc
     var totalVolumeCredits: Int = 0
 }
 
-class TheaterCompany(private val plays: Map<String, Play>) {
+class TheaterCompany(plays: Map<String, Play>) {
 
-    fun statement(invoice: Invoice) = renderPlainText(createStatementData(invoice))
+    private val statementBuilder = StatementBuilder(plays)
 
-    private fun createStatementData(invoice: Invoice) =
-        StatementData(
-            invoice.costumer,
-            invoice.performances.map(::enrichPerformance)
-        ).apply {
-            totalAmount = totalAmount(this)
-            totalVolumeCredits = totalVolumeCredits(this)
-        }
-
-    private fun enrichPerformance(aPerformance: Performance): PerformanceWithPlay =
-        PerformanceWithPlay(
-            playFor(aPerformance) ?: error("Missing play"),
-            aPerformance.audience
-        )
-            .apply {
-                amount = amountFor(this)
-                volumeCredits = volumeCreditsFor(this)
-            }
-
-    private fun totalAmount(data: StatementData): Int =
-        data.performances.map { it.amount }.reduce { acc, amount -> acc + amount }
-
-    private fun totalVolumeCredits(data: StatementData): Int =
-        data.performances.map { it.volumeCredits }.reduce { acc, volumeCredits -> acc + volumeCredits }
-
-    private fun amountFor(aPerformance: PerformanceWithPlay): Int {
-        var result = 0
-
-        when (aPerformance.play.type) {
-            PlayType.TRAGEDY -> {
-                result = 40000
-                if (aPerformance.audience > 30) {
-                    result += 1000 * (aPerformance.audience - 30)
-                }
-            }
-            PlayType.COMEDY -> {
-                result = 30000
-                if (aPerformance.audience > 20) {
-                    result += 10000 + 500 * (aPerformance.audience - 20)
-                }
-                result += 300 * aPerformance.audience
-            }
-        }
-
-        return result
-    }
-
-    private fun playFor(aPerformance: Performance) = plays[aPerformance.playID]
-
-    private fun volumeCreditsFor(aPerformance: PerformanceWithPlay): Int {
-        var result = 0
-        result += max(aPerformance.audience - 30, 0)
-        if (PlayType.COMEDY == aPerformance.play.type)
-            result += floor(aPerformance.audience.toDouble() / 5).toInt()
-
-        return result
-    }
-
+    fun statement(invoice: Invoice) = renderPlainText(statementBuilder.createStatementData(invoice))
+    
     private fun renderPlainText(data: StatementData): String {
         var result = "Statement for ${data.costumer}\n"
 
