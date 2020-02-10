@@ -9,6 +9,7 @@ data class Performance(val playID: String, val audience: Int)
 
 data class PerformanceWithPlay(val play: Play, val audience: Int) {
     var amount: Int = 0
+    var volumeCredits: Int = 0
 }
 
 data class Invoice(val costumer: String, val performances: List<Performance>)
@@ -35,7 +36,10 @@ class TheaterCompany(private val plays: Map<String, Play>) {
             playFor(aPerformance) ?: error("Missing play"),
             aPerformance.audience
         )
-            .apply { amount = amountFor(this) }
+            .apply {
+                amount = amountFor(this)
+                volumeCredits = volumeCreditsFor(this)
+            }
 
     private fun amountFor(aPerformance: PerformanceWithPlay): Int {
         var result = 0
@@ -61,6 +65,15 @@ class TheaterCompany(private val plays: Map<String, Play>) {
 
     private fun playFor(aPerformance: Performance) = plays[aPerformance.playID]
 
+    private fun volumeCreditsFor(aPerformance: PerformanceWithPlay): Int {
+        var result = 0
+        result += max(aPerformance.audience - 30, 0)
+        if (PlayType.COMEDY == aPerformance.play.type)
+            result += floor(aPerformance.audience.toDouble() / 5).toInt()
+
+        return result
+    }
+
     private fun renderPlainText(data: StatementData): String {
         var result = "Statement for ${data.costumer}\n"
 
@@ -76,21 +89,12 @@ class TheaterCompany(private val plays: Map<String, Play>) {
         return result
     }
 
-    private fun volumeCreditsFor(aPerformance: PerformanceWithPlay): Int {
-        var result = 0
-        result += max(aPerformance.audience - 30, 0)
-        if (PlayType.COMEDY == aPerformance.play.type)
-            result += floor(aPerformance.audience.toDouble() / 5).toInt()
-
-        return result
-    }
-
     private fun usd(aNumber: Double) = Money.of(CurrencyUnit.USD, aNumber / 100).toString()
 
     private fun totalVolumeCredits(performances: List<PerformanceWithPlay>): Int {
         var result = 0
         performances.forEach { perf ->
-            result += volumeCreditsFor(perf)
+            result += perf.volumeCredits
         }
         return result
     }
