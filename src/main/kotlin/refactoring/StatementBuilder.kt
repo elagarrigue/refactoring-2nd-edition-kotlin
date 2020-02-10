@@ -1,8 +1,5 @@
 package refactoring
 
-import kotlin.math.floor
-import kotlin.math.max
-
 class StatementBuilder(private val plays: Map<String, Play>) {
 
     fun createStatementData(invoice: Invoice) =
