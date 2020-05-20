@@ -1,5 +1,7 @@
 package refactoring
 
+import refactoring.models.*
+
 class StatementBuilder(private val plays: Map<String, Play>) {
 
     fun createStatementData(invoice: Invoice) =

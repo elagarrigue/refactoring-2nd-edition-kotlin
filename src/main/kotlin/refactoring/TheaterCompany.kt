@@ -2,24 +2,9 @@ package refactoring
 
 import org.joda.money.CurrencyUnit
 import org.joda.money.Money
-
-data class Performance(val playID: String, val audience: Int)
-
-data class PerformanceWithPlay(val play: Play, val audience: Int) {
-    var amount: Int = 0
-    var volumeCredits: Int = 0
-}
-
-data class Invoice(val costumer: String, val performances: List<Performance>)
-
-enum class PlayType { TRAGEDY, COMEDY }
-
-data class Play(val name: String, val type: PlayType)
-
-data class StatementData(val customer: String, val performances: List<PerformanceWithPlay>) {
-    var totalAmount: Int = 0
-    var totalVolumeCredits: Int = 0
-}
+import refactoring.models.Invoice
+import refactoring.models.Play
+import refactoring.models.StatementData
 
 class TheaterCompany(plays: Map<String, Play>) {
 

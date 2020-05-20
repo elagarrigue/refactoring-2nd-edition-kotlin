@@ -2,6 +2,10 @@ package refactoring
 
 import org.amshove.kluent.`should be equal to`
 import org.junit.Test
+import refactoring.models.Invoice
+import refactoring.models.Performance
+import refactoring.models.Play
+import refactoring.models.PlayType
 
 class TheaterCompanyTest {
 
