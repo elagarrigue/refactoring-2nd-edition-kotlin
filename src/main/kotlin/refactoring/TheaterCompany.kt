@@ -2,61 +2,47 @@ package refactoring
 
 import org.joda.money.CurrencyUnit
 import org.joda.money.Money
-import kotlin.math.floor
-import kotlin.math.max
+import refactoring.models.Invoice
+import refactoring.models.Play
+import refactoring.models.StatementData
 
-data class Performance(val playID: String, val audience: Int)
+class TheaterCompany(plays: Map<String, Play>) {
 
-data class Invoice(val costumer: String, val performances: List<Performance>)
+    private val statementBuilder = StatementBuilder(plays)
 
-enum class PlayType { TRAGEDY, COMEDY }
+    fun statement(invoice: Invoice) = renderPlainText(statementBuilder.createStatementData(invoice))
 
-data class Play(val name: String, val type: PlayType)
+    fun htmlStatement (invoice: Invoice) = renderHtml(statementBuilder.createStatementData(invoice))
 
+    private fun renderPlainText(data: StatementData): String {
+        var result = "Statement for ${data.customer}\n"
 
-fun statement(invoice: Invoice, plays: Map<String, Play>): String {
-    var totalAmount = 0
-    var volumeCredits = 0
-    var result = "Statement for ${invoice.costumer}\n"
-    val format: (money: Double) -> String = {
-        Money.of(CurrencyUnit.USD, it).toString()
-    }
+        data.performances.forEach { perf ->
+            // print line for this order
+            result += "${perf.play.name}: ${usd(perf.amount.toDouble())} (${perf.audience} seats)\n"
 
-    invoice.performances.forEach { perf ->
-        val play = plays[perf.playID]
-        var thisAmount = 0
-
-
-        when (play?.type) {
-            PlayType.TRAGEDY -> {
-                thisAmount = 40000
-                if (perf.audience > 30) {
-                    thisAmount += 1000 * (perf.audience - 30)
-                }
-            }
-            PlayType.COMEDY -> {
-                thisAmount = 30000
-                if (perf.audience > 20) {
-                    thisAmount += 10000 + 500 * (perf.audience - 20)
-                }
-                thisAmount += 300 * perf.audience
-            }
-            else -> throw  Error("unknown type: ${play?.type}")
         }
 
-        // add volume credits
-        volumeCredits += max(perf.audience - 30, 0)
-        // add extra credit for every ten comedy attendees
-        if (PlayType.COMEDY == play.type)
-            volumeCredits += floor(perf.audience.toDouble() / 5).toInt()
+        result += "Amount owed is ${usd(data.totalAmount.toDouble())}\n"
+        result += "You earned ${data.totalVolumeCredits} credits\n"
 
-        // print line for this order
-        result += "${play.name}: ${format(thisAmount.toDouble() / 100)} (${perf.audience} seats)\n"
-        totalAmount += thisAmount
+        return result
     }
 
-    result += "Amount owed is ${format(totalAmount.toDouble() / 100)}\n"
-    result += "You earned $volumeCredits credits\n"
+    private fun renderHtml(data: StatementData): String {
+        var result = "<h1>Statement for ${data.customer}</h1>\n"
+        result += "<table>\n"
+        result += "<tr><th>play</th><th>seats</th><th>cost</th></tr>"
 
-    return result
+        data.performances.forEach { perf ->
+            result += " <tr><td>${perf.play.name}</td><td>${perf.audience}</td>"
+            result += "<td>${usd(perf.amount.toDouble())}</td></tr>\n"
+        }
+        result += "</table>\n"
+        result += "<p>Amount owed is <em>${usd(data.totalAmount.toDouble())}</em></p>\n"
+        result += "<p>You earned <em>${data.totalVolumeCredits}</em> credits</p>\n"
+        return result
+    }
+
+    private fun usd(aNumber: Double) = Money.of(CurrencyUnit.USD, aNumber / 100).toString()
 }
