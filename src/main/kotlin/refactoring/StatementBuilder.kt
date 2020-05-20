@@ -12,7 +12,7 @@ class StatementBuilder(private val plays: Map<String, Play>) {
         }
 
     private fun enrichPerformance(aPerformance: Performance): PerformanceWithPlay {
-        val calculator = createPerformanceCalculator(aPerformance)
+        val calculator = PerformanceCalculatorFactory.get(aPerformance, playFor(aPerformance))
 
         return PerformanceWithPlay(
             calculator.play,
@@ -23,13 +23,6 @@ class StatementBuilder(private val plays: Map<String, Play>) {
                 volumeCredits = calculator.getVolumeCredits()
             }
     }
-
-    private fun createPerformanceCalculator(aPerformance: Performance) =
-        when(playFor(aPerformance).type) {
-            PlayType.COMEDY ->  ComedyCalculator(aPerformance, playFor(aPerformance))
-            PlayType.TRAGEDY ->  TragedyCalculator(aPerformance, playFor(aPerformance))
-        }
-
 
     private fun totalAmount(data: StatementData): Int =
         data.performances.map { it.amount }.reduce { acc, amount -> acc + amount }

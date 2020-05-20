@@ -3,6 +3,15 @@ package refactoring
 import kotlin.math.floor
 import kotlin.math.max
 
+object PerformanceCalculatorFactory {
+
+    fun get(aPerformance: Performance, play: Play) =
+        when (play.type) {
+            PlayType.COMEDY -> ComedyCalculator(aPerformance, play)
+            PlayType.TRAGEDY -> TragedyCalculator(aPerformance, play)
+        }
+}
+
 sealed class PerformanceCalculator(
     val performance: Performance,
     val play: Play
